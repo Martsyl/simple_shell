@@ -8,6 +8,6 @@
 #include <string.h>
 #include <sys/types.h>
 #include <fcntl.h>
-extern char **environ;
-int handle_inp(char **buff, char *av[2]);
+extern char** environ;
+int handle_inp(char **buff, char *av[]);
 #endif
