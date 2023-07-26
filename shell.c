@@ -11,7 +11,7 @@ int main(void)
 
 	while (keep_running)
 	{
-		printf("$ ");
+		printf("#cisfun$ ");
 		if (handle_inp(&buff, agc) == -1)
 			keep_running = 0;
 		else
@@ -22,7 +22,7 @@ int main(void)
 			if (pid == 0)
 			{
 				if (execve(agc[0], agc, environ) == -1)
-					perror("./shelly");
+					perror("./shell");
 
 			}
 			else if (pid == -1)

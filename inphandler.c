@@ -6,7 +6,7 @@
  * Return: 0 on sucess
  */
 
-int handle_inp(char **buff, char *args[])
+int handle_inp(char **buff, char *args[2])
 {
 	size_t get_len = 0;
 	ssize_t read_inp;
