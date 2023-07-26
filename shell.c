@@ -12,7 +12,7 @@ int main(void)
 
 	while (keep_running)
 	{
-		printf("#cisfun$ ");
+		_puts("#cisfun$ ");
 		if (handle_inp(&buff, agc) == -1)
 			keep_running = 0;
 		else
