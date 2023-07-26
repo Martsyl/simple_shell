@@ -1,11 +1,10 @@
 #include "main.h"
 /**
- * handle_inp - handles the inpu function
- * @buff: char pointer
- * @args: argument
- * Return: 0 on sucess
- */
-
+* handle_inp - Entry point
+* @buff:usr inp
+* @args: String array for command args
+* Return: 0 on success
+*/
 int handle_inp(char **buff, char *args[])
 {
 	size_t get_len = 0;
@@ -14,7 +13,9 @@ int handle_inp(char **buff, char *args[])
 	read_inp = getline(buff, &get_len, stdin);
 
 	if (read_inp == -1 || (*buff)[read_inp - 1] != 10)
+	{
 		return (-1);
+	}
 	(*buff)[read_inp - 1] = '\0';
 	args[0] = (*buff);
 	args[1] = NULL;
@@ -23,6 +24,11 @@ int handle_inp(char **buff, char *args[])
 	{
 		return (1);
 	}
+	if (!isatty(STDIN_FILENO))
+	{
+		return (2);
+	}
+
 	return (0);
 
 }
