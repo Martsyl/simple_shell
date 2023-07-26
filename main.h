@@ -9,5 +9,5 @@
 #include <sys/types.h>
 #include <fcntl.h>
 extern char **environ;
-int handle_inp(char **buff, char *av[]);
+int handle_inp(char **buff, char *args[2]);
 #endif
