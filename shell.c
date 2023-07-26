@@ -6,7 +6,8 @@
 int main(void)
 {
 	int get_status, keep_running = 1;
-	char *buff = NULL, *agc[2];
+	char *buff = NULL; 
+	char *agc[2];
 	pid_t pid;
 
 	while (keep_running)
