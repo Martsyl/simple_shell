@@ -1,50 +1,57 @@
 #include "main.h"
+
 /**
-* main - Entry point
-* Return: 0 on success
-*/
+ * main - Entry point
+ *
+ * Return: Always 0
+ */
 
 int main(void)
 {
-	int get_status, keep_running = 1, get_input, get_num = 0;
-	char *buff = NULL;
-	pid_t pid;
-	char *agc[20], *args;
+	bool keep_running = true;
+	char *buff = NULL, *buff_cpy = NULL;
+	const char *get_delim = " \t\n";
+	size_t get_buffsize = 0, gettk_len;
+	int count;
+	ssize_t rn;
+	char *tkns[100] = {0}, *tkn = NULL;
 
 	while (keep_running)
 	{
-		_puts("$ ");
-		get_input = handle_inp(&buff, agc);
-		if (get_input == -1 || get_input == 2)
-			keep_running = 0;
-		if (get_input != -1)
+		if (isatty(STDIN_FILENO))
+			write(1, "#cisfun$ ", 9);
+		else
+			keep_running = false;
+		rn = getline(&buff, &get_buffsize, stdin);
+		if (rn == -1)
 		{
-			if (buff[0] == '\0')
-				continue;
-			args = strtok(buff, " ");
-			while (args != NULL)
+			if (!isatty(STDIN_FILENO))
 			{
-				agc[get_num] = args;
-				args = strtok(NULL, " ");
-				get_num++;
+				free(buff);
+				break;
 			}
-			agc[get_num] = NULL;
-			pid = fork();
-			if (pid == 0)
-			{
-				if (execve(agc[0], agc, environ) == -1)
-					perror(agc[0]);
-			}
-			else if (pid == -1)
-				keep_running = 0;
-			else
-			{
-				wait(&get_status);
-				if (!(WIFEXITED(get_status) && (WEXITSTATUS(get_status) == 0)))
-					keep_running = 0;
-			}
+			perror("getline");
+			free(buff);
+			exit(EXIT_FAILURE);
 		}
+		if (*buff == '\n' || (*buff == ' ' || *buff == '\t'))
+			continue;
+		buff_cpy = str_dup(buff);
+		tkn = strtok(buff_cpy, get_delim);
+		for (count = 0; tkn; count++)
+		{
+			gettk_len = _strlen(tkns);
+			tkns[count] = malloc(sizeof(char *) * gettk_len);
+			strn_cpy(tkns[count], tkn, gettk_len + 1);
+			tkn = strtok(NULL, get_delim);
+		}
+		free(buff_cpy);
+		exec_cmmd(tkns, buff);
+		free_line(tkns);
+		free(buff);
+		buff = NULL;
+		get_buffsize = 0;
 	}
 	free(buff);
-	return (keep_running ? 0 : 1);
+	return (0);
 }
