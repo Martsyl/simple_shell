@@ -1,4 +1,5 @@
 #include "main.h"
+
 /**
  * mem_cpy - function that copies memory area.
  * @str:  memory area.
@@ -6,6 +7,7 @@
  * @b: bytes to be copied.
  * Return: str.
  */
+
 char *mem_cpy(char *str, char *mem, unsigned int b)
 {
 	unsigned int i;
@@ -18,12 +20,12 @@ char *mem_cpy(char *str, char *mem, unsigned int b)
 }
 
 /**
- * str_cat - concatenate 
- *
- * @str: string
- * @cat: source srting
- * Return: str
- */
+* str_cat - concatenate 
+*
+* @str: string
+* @cat: source srting
+* Return: str
+*/
 char *str_cat(char *str, char *cat)
 {
 	int i = 0;
@@ -76,6 +78,7 @@ int _strlen(char *str)
  * @str: ptr to be duplicated.
  * Return: NULL or str1.
  */
+
 char *str_dup(char *str)
 {
 	char *str1;
