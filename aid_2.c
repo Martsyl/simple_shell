@@ -102,11 +102,13 @@ int _atoi(char *c)
  */
 int history_info(das_h *data)
 {
-	(void) data;
-	char *filename = "history";
-	char *line_of_history = "this is a line of history";
 	ssize_t fd, w;
-	int len = 0;
+	int len;
+	char *filename, *line_of_history;
+	(void) data;
+	filename = "history";
+	line_of_history = "this is a line of history";
+	len = 0;
 
 	if (!filename)
 		return (-1);

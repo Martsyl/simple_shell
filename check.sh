@@ -3,7 +3,7 @@
 # Usage : ./check.sh | less -r
 # copy this file inside your project folder and run ./checker.sh | less -r
 
-gcc  *.c -o hsh
+gcc -Wall -Werror -Wextra -pedantic -std=gnu89 *.c -o hsh
 function run_check()
 {
     echo "--> [" $1 "] <--"
