@@ -86,7 +86,7 @@ void shell_prompt(dash_data *shdata)
 	should_continue = 1;
 	while (should_continue == 1)
 	{
-		write(STDIN_FILENO, "(^ ^) ", 8);
+		write(STDIN_FILENO, "(^ ^) ", 7);
 		input = _get_line(&i_eof);
 		if (i_eof != -1)
 		{

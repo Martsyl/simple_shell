@@ -70,16 +70,16 @@ void _help_info(void)
 {
 	char *help = "(^ ^) bash, version 1.0(1)-release\n";
 
-	write(STDOUT_FILENO, help, _strlen(help));
+	PUT(help);
 	help = "These commands are defined internally. Type 'help' to see the list.";
 	help = " Type 'help name' to find out more about the function 'name'.\n\n ";
-	write(STDOUT_FILENO, help, _strlen(help));
+	PUT(help);
 	help = "alias: alias [name=['string']]\n cd: cd [-L|[-P [-e]] [-@]] [dir]";
 	help = "exit: exit [n]\n";
 	help = "env: env [option] [name=value] [command [args]]\n";
 	help = "setenv: setenv [variable] [value]\n";
 	help = "unsetenv: unsetenv [variable]\n";
-	write(STDOUT_FILENO, help, _strlen(help));
+	PUT(help);
 }
 
 /**

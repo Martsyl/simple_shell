@@ -8,7 +8,7 @@
  * @input: input string
  * Return: no return
  */
-void add_nodes(div_list **head_s, line_list **head_l, char *input)
+void add_nodes(dash_list **head_s, line_list **head_l, char *input)
 {
 	int i;
 	char *line;
@@ -43,10 +43,10 @@ void add_nodes(div_list **head_s, line_list **head_l, char *input)
  * @shdata: data structure
  * Return: no return
  */
-void next_cmd(div_list **list_s, line_list **list_l, dash_data *shdata)
+void next_cmd(dash_list **list_s, line_list **list_l, dash_data *shdata)
 {
 	int loop_sep;
-	div_list *ls_s;
+	dash_list *ls_s;
 	line_list *ls_l;
 
 	loop_sep = 1;
@@ -87,7 +87,7 @@ void next_cmd(div_list **list_s, line_list **list_l, dash_data *shdata)
  */
 int div_commands(dash_data *shdata, char *input)
 {
-	div_list *head_s, *list_s;
+	dash_list *head_s, *list_s;
 	line_list *head_l, *list_l;
 	int loop;
 
@@ -144,7 +144,7 @@ char **tokenize_line(char *input)
 		exit(EXIT_FAILURE);
 	}
 
-	token = _strtok(input, TOKEN_DELIM);
+	token = _strtok(input, DELIMETER);
 	tokens[0] = token;
 
 	for (i = 1; token != NULL; i++)
@@ -159,7 +159,7 @@ char **tokenize_line(char *input)
 				exit(EXIT_FAILURE);
 			}
 		}
-		token = _strtok(NULL, TOKEN_DELIM);
+		token = _strtok(NULL, DELIMETER);
 		tokens[i] = token;
 	}
 

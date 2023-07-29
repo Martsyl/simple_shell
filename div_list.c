@@ -65,16 +65,16 @@ void free_store_var_list(store_var **head)
 }
 
 /**
- * add_div_node_end - Adds a separator found at the end of a div_list.
+ * add_div_node_end - Adds a separator found at the end of a dash_list.
  *
  * @head: Address of the head of the linked list.
  * @sep: Separator found (; | &).
  *
  * Return: Address of the head.
  */
-div_list *add_div_node_end(div_list **head, char sep)
+dash_list *add_div_node_end(dash_list **head, char sep)
 {
-	div_list *new = malloc(sizeof(*new));
+	dash_list *new = malloc(sizeof(*new));
 
 	if (!new)
 		return (NULL);
@@ -88,7 +88,7 @@ div_list *add_div_node_end(div_list **head, char sep)
 	}
 	else
 	{
-		div_list *temp = *head;
+		dash_list *temp = *head;
 
 		while (temp->next != NULL)
 			temp = temp->next;
@@ -99,21 +99,21 @@ div_list *add_div_node_end(div_list **head, char sep)
 }
 
 /**
- * free_div_list - Frees a div_list.
+ * free_div_list - Frees a dash_list.
  *
  * @head: Address of the head of the linked list.
  *
  * Return: No return.
  */
-void free_div_list(div_list **head)
+void free_div_list(dash_list **head)
 {
 	if (head)
 	{
-		div_list *curr = *head;
+		dash_list *curr = *head;
 
 		while (curr)
 		{
-			div_list *temp = curr;
+			dash_list *temp = curr;
 
 			curr = curr->next;
 			free(temp);

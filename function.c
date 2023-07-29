@@ -101,9 +101,7 @@ int _delenv(dash_data *shdata)
 		var_env = _strdup(shdata->_environ[i]);
 		name_env = _strtok(var_env, "=");
 		if (_strcmp(name_env, shdata->args[1]) == 0)
-		{
 			k = i;
-		}
 		free(var_env);
 	}
 

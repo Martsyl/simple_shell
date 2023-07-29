@@ -31,7 +31,7 @@ int error_code(dash_data *shdata, int eval)
 
 	if (error)
 	{
-		write(STDERR_FILENO, error, _strlen(error));
+		PUT_ERR(error);
 
 		free(error);
 	}
@@ -48,7 +48,7 @@ int error_code(dash_data *shdata, int eval)
  */
 int (*get_builtin(char *cmd))(dash_data *)
 {
-	built_in builtin[] = {
+	in_built builtin[] = {
 		{ "env", _env },
 		{ "exit", exit_shell },
 		{ "setenv", _setenv },

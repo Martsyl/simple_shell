@@ -138,7 +138,7 @@ void syntax_error_info(dash_data *shdata, char *input, int i, int bool)
 	_strcat(error, msg3);
 	_strcat(error, "\0");
 
-	write(STDERR_FILENO, error, length);
+	PUT_ELEN(erro, length);
 	free(error);
 	free(counter);
 }

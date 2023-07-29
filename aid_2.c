@@ -154,9 +154,9 @@ void cmd_help(void)
 {
 	char *help = "help: help [-dms] [pattern ...]\n";
 
-	write(STDOUT_FILENO, help, _strlen(help));
+	PUT(help);
 	help = "\tDisplay information about builtin commands.\n";
-	write(STDOUT_FILENO, help, _strlen(help));
+	PUT(help);
 	help = "Displays brief summaries of builtin commands.\n";
-	write(STDOUT_FILENO, help, _strlen(help));
+	PUT(help);
 }

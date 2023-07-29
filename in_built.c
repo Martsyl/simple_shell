@@ -143,7 +143,7 @@ void cd_go_back(dash_data *shdata)
 	else
 		set_env_var("PWD", cp_oldpwd, shdata);
 
-	write(STDOUT_FILENO, cp_pwd, _strlen(cp_pwd));
+	PUT_PWD(cp_pwd);
 	write(STDOUT_FILENO, "\n", 1);
 
 	free(cp_pwd);

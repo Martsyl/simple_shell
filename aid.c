@@ -8,9 +8,9 @@ void aux_help_alias(void)
 {
 	char *help = "alias: alias [-p] [name[=value]...]\n";
 
-	write(STDOUT_FILENO, help, _strlen(help));
+	PUT(help);
 	help = "\tDefine or display aliases.\n";
-	write(STDOUT_FILENO, help, _strlen(help));
+	PUT(help);
 }
 
 /**
@@ -21,9 +21,9 @@ void change_cd_help(void)
 {
 	char *help = "cd: cd [-L|[-P [-e]] [-@]] [dir]\n";
 
-	write(STDOUT_FILENO, help, _strlen(help));
+	PUT(help);
 	help = "\tChange the shell working directory.\n";
-	write(STDOUT_FILENO, help, _strlen(help));
+	PUT(help);
 }
 
 /**

@@ -13,7 +13,12 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#define TOKEN_DELIM " \t\r\n\a"
+/******** macros ********/
+#define PUT_PWD(cp_pwd) write(STDOUT_FILENO, cp_pwd, _strlen(cp_pwd))
+#define PUT(help) write(STDOUT_FILENO, help, _strlen(help))
+#define PUT_ELEN(erro, length) write(STDERR_FILENO, error, length)
+#define PUT_ERR(error) write(STDERR_FILENO, error, _strlen(error))
+#define DELIMETER " \t\r\n\a"
 #define TOKENSIZE 128
 #define BUFSIZE 1024
 
@@ -51,7 +56,7 @@ typedef struct div
 {
 	char separator;
 	struct div *next;
-} div_list;
+} dash_list;
 
 /**
  * struct cmd_line_list - single linked list
@@ -82,15 +87,15 @@ typedef struct store_var_list
 } store_var;
 
 /**
- * struct built_in_s - Builtin struct for command args.
+ * struct inbuilt - Builtin struct for command args.
  * @name: The name of the command builtin i.e cd, exit, env
  * @f: data type pointer function.
  */
-typedef struct built_in_s
+typedef struct inbuilt
 {
 	char *name;
 	int (*f)(dash_data *shdata);
-} built_in;
+} in_built;
 
 /*change_dir.c*/
 int cd_dir(dash_data *shdata);
@@ -116,12 +121,12 @@ void aux_help_alias(void);
 void change_cd_help(void);
 void rev_string(char *s);
 
-/*div_list.c*/
+/*dash_list.c*/
 store_var *add_store_var_node(store_var **head,
 		int var_length, char *value, int value_length);
 void free_store_var_list(store_var **head);
-div_list *add_div_node_end(div_list **head, char sep);
-void free_div_list(div_list **head);
+dash_list *add_div_node_end(dash_list **head, char sep);
+void free_div_list(dash_list **head);
 line_list *add_line_node_end(line_list **head, char *line);
 void free_line_list(line_list **head);
 
@@ -179,8 +184,8 @@ int check_cmd_error(char *dir, dash_data *shdata);
 int cmd_execve(dash_data *shdata);
 
 /*shs_tokenize.c*/
-void add_nodes(div_list **head_s, line_list **head_l, char *input);
-void next_cmd(div_list **list_s, line_list **list_l, dash_data *shdata);
+void add_nodes(dash_list **head_s, line_list **head_l, char *input);
+void next_cmd(dash_list **list_s, line_list **list_l, dash_data *shdata);
 int div_commands(dash_data *shdata, char *input);
 char **tokenize_line(char *input);
 char *swap_char(char *input, int bool);

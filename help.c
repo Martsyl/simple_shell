@@ -8,9 +8,9 @@ void _help_info_env(void)
 {
 	char *help = "env: env [option] [name=value] [command [args]]\n\t";
 
-	write(STDOUT_FILENO, help, _strlen(help));
+	PUT(help);
 	help = "Print the environment of the shell.\n";
-	write(STDOUT_FILENO, help, _strlen(help));
+	PUT(help);
 }
 
 /**
@@ -22,10 +22,10 @@ void _help_info_setenv(void)
 {
 	char *help = "setenv: setenv (const char *name, const char *value, ";
 
-	write(STDOUT_FILENO, help, _strlen(help));
+	PUT(help);
 	help = "int replace)\n\t";
 	help = "Add a new definition to the environment.\n";
-	write(STDOUT_FILENO, help, _strlen(help));
+	PUT(help);
 }
 
 /**
@@ -37,9 +37,9 @@ void _help_info_unsetenv(void)
 {
 	char *help = "unsetenv: unsetenv (const char *name)\n\t";
 
-	write(STDOUT_FILENO, help, _strlen(help));
+	PUT(help);
 	help = "Remove an entry completely from the environment.\n";
-	write(STDOUT_FILENO, help, _strlen(help));
+	PUT(help);
 }
 
 /**
@@ -52,10 +52,10 @@ void _help_info_exit(void)
 
 	help = "Exit shell.\n";
 
-	write(STDOUT_FILENO, help, _strlen(help));
+	PUT(help);
 	help = "Exits the shell with a status of N. If N is omitted, the exit ";
 	help = "status is that of the last command executed.\n";
-	write(STDOUT_FILENO, help, _strlen(help));
+	PUT(help);
 }
 /**
  * get_help - function that retrieves help messages according to the builtin
