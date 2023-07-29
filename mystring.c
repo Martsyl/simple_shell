@@ -1,136 +1,137 @@
 #include "dash.h"
 
 /**
- * _strcat - Concatenates two strings in a path form.
- * @first: The first given destination.
- * @second: The second given source.
+ * _strdup - Duplicate a string in heap memory.
  *
- * Return: (Success) A newly allocated string containing the conc. outcome.
- * ------- (Fail) NULL if memory allocation fails.
+ * @s: String to duplicate.
+ *
+ * Return: Pointer to the duplicated string,
+ * or NULL if memory allocation fails.
  */
-char *_strcat(char *first, char *second)
+char *_strdup(const char *s)
 {
-	int len1, len2, i = 0, j = 0;
-	char *outcome;
+	char *new;
+	size_t len;
 
-	len1 = _strlen(first);
-	len2 = _strlen(second);
-
-    /* Allocate memory for the concatenated string */
-	outcome = malloc((len1 + len2 + 2) * sizeof(char));
-	if (!outcome)
+	len = _strlen(s);
+	new = malloc(sizeof(char) * (len + 1));
+	if (new == NULL)
 		return (NULL);
-
-	*outcome = '\0';
-
-    /* Copy the first string into the outcome */
-	while (first[j])
-		outcome[i++] = first[j++];
-
-    /* Add a path separator '/' */
-	outcome[i++] = '/';
-
-	j = 0;
-
-    /* Append the second string to the outcome */
-	while (second[j])
-		outcome[i++] = second[j++];
-
-    /* Null-terminate the outcome string */
-	outcome[i] = '\0';
-
-	return (outcome);
+	_memcpy(new, s, len + 1);
+	return (new);
 }
 
 /**
- * _strlen - Finds the length of a given string.
- * @str: The given string.
+ * _strlen - Get the length of a string.
  *
- * Return: (Success) The length of the string.
- * ------- (Fail) Returns a negative value.
+ * @s: String to calculate the length of.
+ *
+ * Return: Length of the string.
  */
-int _strlen(char *str)
+size_t _strlen(const char *s)
 {
-	int len;
+	size_t len;
 
-	for (len = 0; str[len]; len++)
-		;
+	for (len = 0; s[len] != '\0'; len++)
+	{
+	}
 	return (len);
 }
 
 /**
- * _strcmp - Compare two strings.
- * @s1: The first given string.
- * @s2: The second given string.
+ * comp_chars - Compare characters of strings.
  *
- * Return: (Success) A positive number if strings are different..
+ * @str: Input string.
+ * @delim: Delimiter.
+ *
+ * Return: 1 if the characters are equal, 0 if they are not.
  */
-int _strcmp(char *s1, char *s2)
+int comp_chars(const char str[], const char *delim)
 {
-	int cmp = 0, i;
+	unsigned int i, j, k;
 
-    /* Check if either of the strings is NULL */
-	if (s1 == NULL || s2 == NULL)
-		return (1);
-
-    /* Compare char until a diff is found or the end of one str is reached */
-	for (i = 0; s1[i]; i++)
+	for (i = 0, k = 0; str[i]; i++)
 	{
-		if (s1[i] != s2[i])
+		for (j = 0; delim[j]; j++)
 		{
-			cmp = s1[i] - s2[i];
+			if (str[i] == delim[j])
+			{
+				k++;
 				break;
+			}
 		}
-		else
-			continue;
 	}
-	return (cmp);
+	if (i == k)
+		return (1);
+	return (0);
 }
 
 /**
- * _strchr - Locates a character in a given string.
- * @str: The given string.
- * @c: The character to be found.
+ * _strtok - Split a string by a delimiter.
  *
- * Return: (Success) A pointer to the first occurrence of the char c in str.
- * ------- (Fail) Return a NULL pointer if the character is not found.
+ * @str: Input string.
+ * @delim: Delimiter.
+ *
+ * Return: The next token in the string, or NULL if no more tokens are found.
  */
-char *_strchr(char *str, char c)
+char *_strtok(char str[], const char *delim)
 {
-	char *ptr;
+	static char *splitted, *str_end;
+	char *str_start;
+	unsigned int i, bool;
 
-	if (!str)
+	if (str != NULL)
+	{
+		if (comp_chars(str, delim))
+			return (NULL);
+		splitted = str; /* Store first address */
+		i = _strlen(str);
+		str_end = &str[i]; /* Store last address */
+	}
+	str_start = splitted;
+	if (str_start == str_end) /* Reach the end */
 		return (NULL);
 
-    /* Iterate through the string until the character is found */
-
-	for (ptr = str; *ptr; ptr++)
-		if (*ptr == c)
-			return (ptr);
-	return (NULL);
+	for (bool = 0; *splitted; splitted++)
+	{
+		/* Breaking loop finding the next token */
+		if (splitted != str_start)
+			if (*splitted && *(splitted - 1) == '\0')
+				break;
+		/* Replacing delimiter with null character */
+		for (i = 0; delim[i]; i++)
+		{
+			if (*splitted == delim[i])
+			{
+				*splitted = '\0';
+				if (splitted == str_start)
+					str_start++;
+				break;
+			}
+		}
+		if (bool == 0 && *splitted) /* Str != Delim */
+			bool = 1;
+	}
+	if (bool == 0) /* Str == Delim */
+		return (NULL);
+	return (str_start);
 }
 
 /**
- * _strdup - Duplicates a string.
- * @str: The given string.
+ * _isdigit - Check if a string consists of digits.
  *
- * Return: (Success) A pointer to the duplicated string.
- * ------- (Fail) Return a NULL pointer if memory allocation fails.
+ * @s: Input string.
+ *
+ * Return: 1 if the string consists of digits, 0 otherwise.
  */
-char *_strdup(char *str)
+int _isdigit(const char *s)
 {
-	char *paired;
+	unsigned int i;
 
-	if (!str)
-		return (NULL);
-
-    /* Allocate memory for the duplicate string */
-	paired = malloc(_strlen(str) + 1);
-	if (!paired)
-		return (NULL);
-
-    /* Copy the original string into the duplicate */
-	_strcpy(paired, str);
-	return (paired);
+	for (i = 0; s[i]; i++)
+	{
+		if (s[i] < '0' || s[i] > '9')
+			return (0);
+	}
+	return (1);
 }
-

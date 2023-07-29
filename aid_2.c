@@ -1,129 +1,162 @@
 #include "dash.h"
 
 /**
- * len_digit - Determine the number of digits in an integer
- * @num: The given number
+ * get_len - Get the length of a number.
  *
- * Return: The length of the integer
+ * @n: Integer number.
+ *
+ * Return: Length of the number.
  */
-int len_digit(int num)
+int get_len(int n)
 {
-	int len = 1;
+	unsigned int n1;
+	int length = 1;
 
-	while (num >= 10) /* Continue until the number becomes single-digit */
+	if (n < 0)
 	{
-		len++;
-		num /= 10;
+		length++;
+		n1 = n * -1;
 	}
-	return (len);
+	else
+	{
+		n1 = n;
+	}
+
+	while (n1 > 9)
+	{
+		length++;
+		n1 /= 10;
+	}
+
+	return (length);
 }
 
 /**
- * error_info - Print error message to standard output
- * @data: The data structure pointer
+ * int_to_string - Converts int to string.
  *
- * Return: Always returns 0
- */
-int error_info(das_h *data)
-{
-	char *idx = int_to_str(data->index);
-
-	PUT("hsh: ");
-	PUT(idx);
-	PUT(": ");
-	PUT(data->args[0]);
-	PUT(": ");
-	PUT(data->error_msg);
-
-	free(idx);
-	return (0);
-}
-
-/**
- * int_to_str - Convert an integer to a string
- * @n: The given number
+ * @n: Integer number.
  *
- * Return: A pointer to the null-terminated string
+ * Return: String.
  */
-char *int_to_str(unsigned int n)
+char *int_to_string(int n)
 {
-	int len = 0;
-	char *s;
+	unsigned int n1;
 
-	len = len_digit(n);
-	s = malloc(len + 1);
-	if (!s)
+	int length = get_len(n);
+	char *buffer;
+
+	buffer = malloc(sizeof(char) * (length + 1));
+	if (!buffer)
 		return (NULL);
 
-	s[len] = '\0'; /* Null-terminate the string */
-	while (n != 0)
+	buffer[length] = '\0';
+
+	if (n < 0)
 	{
-		s[--len] = (n % 10) + '0'; /* Convert the last digit to a character */
-		n /= 10;
+		n1 = n * -1;
+		buffer[0] = '-';
+	}
+	else
+	{
+		n1 = n;
 	}
 
-	return (s);
+	length--;
+	do {
+		buffer[length] = (n1 % 10) + '0';
+		n1 /= 10;
+		length--;
+	} while (n1 > 0);
+
+	return (buffer);
 }
 
 /**
- * _atoi - Convert a string to an integer
- * @c: The given character
+ * _atoi - Converts a string to an integer.
  *
- * Return: An integer
+ * @s: Input string.
+ *
+ * Return: Integer.
  */
-int _atoi(char *c)
+int _atoi(char *s)
 {
-	unsigned int val = 0;
-	int sign = 1;
+	unsigned int count = 0, size = 0, pn = 1, m = 1, i;
+	int oi;
 
-	if (!c)
-		return (0);
-
-	if (*c == '-') /* Check for negative sign */
+	while (s[count] != '\0')
 	{
-		sign = -1;
-		c++;
+		if (size > 0 && (s[count] < '0' || s[count] > '9'))
+			break;
+
+		if (s[count] == '-')
+			pn *= -1;
+
+		if ((s[count] >= '0') && (s[count] <= '9'))
+		{
+			if (size > 0)
+				m *= 10;
+			size++;
+		}
+		count++;
 	}
 
-	while (*c)
-	{
-		val = (val * 10) + (*c - '0'); /* Convert the character to integer digit */
-		c++;
-	}
+	oi = 0;
 
-	return (sign * val);
+	for (i = count - size; i < count; i++)
+	{
+		oi = oi + ((s[i] - '0') * m);
+
+		m /= 10;
+	}
+	return (oi * pn);
 }
 
 /**
- * history_info - Write a line of history to a file
- * @data: The data structure pointer (Unused in this implementation)
+ * without_comment - deletes comments from the input
  *
- * Return: 1 on success, -1 on failure
+ * @in: input string
+ * Return: input without comments
  */
-int history_info(das_h *data)
+char *without_comment(char *in)
 {
-	ssize_t fd, w;
-	int len;
-	char *filename, *line_of_history;
-	(void) data;
-	filename = "history";
-	line_of_history = "this is a line of history";
-	len = 0;
+	int i, up_to;
 
-	if (!filename)
-		return (-1);
-	fd = open(filename, O_RDWR | O_APPEND);
-	if (fd < 0)
-		return (-1);
-
-	if (line_of_history)
+	up_to = 0;
+	for (i = 0; in[i]; i++)
 	{
-		while (line_of_history[len])
-			len++;
-		w = write(fd, line_of_history, len);
-		if (w < 0)
-			return (-1);
+		if (in[i] == '#')
+		{
+			if (i == 0)
+			{
+				free(in);
+				return (NULL);
+			}
+
+			if (in[i - 1] == ' ' || in[i - 1] == '\t' || in[i - 1] == ';')
+				up_to = i;
+		}
 	}
 
-	return (1);
+	if (up_to != 0)
+	{
+		in = _realloc(in, i, up_to + 1);
+		in[up_to] = '\0';
+	}
+
+	return (in);
+}
+
+/**
+ * cmd_help - Provides help information for the builtin help command.
+ * Return: No return value.
+ */
+void cmd_help(void)
+{
+	char *help = "help: help [-dms] [pattern ...]\n";
+
+	write(STDOUT_FILENO, help, _strlen(help));
+	help = "\tDisplay information about builtin commands.\n";
+	write(STDOUT_FILENO, help, _strlen(help));
+	help = "Displays brief summaries of builtin commands.\n";
+	write(STDOUT_FILENO, help, _strlen(help));
 }

@@ -1,102 +1,154 @@
 #include "dash.h"
 
 /**
- * is_path - check if the given filename is a path
- * @data: the data struct pointer
+ * copy_info - copies info to create
+ * a new env or alias
+ * @name: name (env or alias)
+ * @value: value (env or alias)
  *
- * Return: (Success) - PASS if the filename is a path.
- *         (Fail)    - CRASH otherwise.
+ * Return: new env or alias.
  */
-int is_path(das_h *data)
+char *copy_info(char *name, char *value)
 {
-	/* Check if the filename contains '/' */
-	if (_strchr(data->args[0], '/') != 0)
-	{
-		/* If it contains '/', set the command to the filename. */
-		data->cmd = _strdup(data->args[0]);
-		return (PASS);
-	}
-	return (CRASH);
+	char *new;
+	int len_name, len_value, len;
+
+	len_name = _strlen(name);
+	len_value = _strlen(value);
+	len = len_name + len_value + 2;
+	new = malloc(sizeof(char) * len);
+	_strcpy(new, name);
+	_strcat(new, "=");
+	_strcat(new, value);
+	_strcat(new, "\0");
+
+	return (new);
 }
 
-#define DELIMITER ":"
-
 /**
- * is_short - check if the given filename is in short form
- * @data: the data struct pointer
+ * set_env_var - sets an environment variable
  *
- * Return: (Success) - No explicit return value.
- *         (Fail)    - No explicit return value.
- **/
-void is_short(das_h *data)
+ * @name: name of the environment variable
+ * @value: value of the environment variable
+ * @shdata: data structure (environ)
+ * Return: no return
+ */
+void set_env_var(char *name, char *value, dash_data *shdata)
 {
-	char *path, *token, *_path;
-	struct stat st;
-	int exist_flag = 0;
+	int i;
+	char *var_env, *name_env;
 
-	/* Get the value of the PATH environment variable */
-	path = _getenv("PATH");
-	_path = _strdup(path);
-
-	/* Split the PATH using ':' as the delimiter and search for the executable*/
-	token = strtok(_path, DELIMITER);
-	while (token)
+	for (i = 0; shdata->_environ[i]; i++)
 	{
-		/* Concatenate the path with the filename to get the full command path. */
-		data->cmd = _strcat(token, data->args[0]);
-
-		/* Check if the file exists using stat function. */
-		if (stat(data->cmd, &st) == 0)
+		var_env = _strdup(shdata->_environ[i]);
+		name_env = _strtok(var_env, "=");
+		if (_strcmp(name_env, name) == 0)
 		{
-			exist_flag = 1;
-			break;
+			free(shdata->_environ[i]);
+			shdata->_environ[i] = copy_info(name_env, value);
+			free(var_env);
+			return;
 		}
-
-		/* Free the memory for the current path and prepare for the next iteration*/
-		free(data->cmd);
-		token = strtok(NULL, DELIMITER);
+		free(var_env);
 	}
 
-	/* If the executable doesn't exist in any path, use the filename. */
-	if (exist_flag == 0)
-	{
-		data->cmd = _strdup(data->args[0]);
-	}
-
-	/* Free the memory allocated for the PATH copy. */
-	free(_path);
+	shdata->_environ = _realloc_ptr(shdata->_environ,
+			i, sizeof(char *) * (i + 2));
+	shdata->_environ[i] = copy_info(name, value);
+	shdata->_environ[i + 1] = NULL;
 }
-
-#undef DELIMITER
 
 /**
- * is_in_built - check if the command is a built-in command
- * @data: a pointer to the data structure
+ * _setenv - compares env variables names
+ * with the name passed.
+ * @shdata: data relevant (env name and env value)
  *
- * Return: (Success) - 0 is returned if the command is a built-in command.
- *         (Fail)    - A negative number is returned otherwise.
+ * Return: 1 on success.
  */
-int is_in_built(das_h *data)
+int _setenv(dash_data *shdata)
 {
-	in_built blt[] = {
-		{"exit", kill_program},
-		{"cd", cd_dir},
-		{"help", help_info},
-		{NULL, NULL}
-	};
-	int i = 0;
-
-	/* Loop through the list to check if the given cmd is one of them. */
-	while ((blt + i)->cmd)
+	if (shdata->args[1] == NULL || shdata->args[2] == NULL)
 	{
-		/* Compare the given command with the current built-in command. */
-		if (_strcmp(data->args[0], (blt + i)->cmd) == 0)
-			return (PASS);
-
-		/* Move to the next built-in command. */
-		i++;
+		error_code(shdata, -1);
+		return (1);
 	}
 
-	return (OK);
+	set_env_var(shdata->args[1], shdata->args[2], shdata);
+
+	return (1);
 }
 
+/**
+ * _delenv - deletes an environment variable
+ *
+ * @shdata: data relevant (env name)
+ *
+ * Return: 1 on success.
+ */
+int _delenv(dash_data *shdata)
+{
+	char **realloc_environ, *var_env, *name_env;
+	int i, j, k;
+
+	if (shdata->args[1] == NULL)
+	{
+		error_code(shdata, -1);
+		return (1);
+	}
+	k = -1;
+	for (i = 0; shdata->_environ[i]; i++)
+	{
+		var_env = _strdup(shdata->_environ[i]);
+		name_env = _strtok(var_env, "=");
+		if (_strcmp(name_env, shdata->args[1]) == 0)
+		{
+			k = i;
+		}
+		free(var_env);
+	}
+
+	if (k == -1)
+	{
+		error_code(shdata, -1);
+		return (1);
+	}
+
+	realloc_environ = malloc(sizeof(char *) * (i));
+	for (i = j = 0; shdata->_environ[i]; i++)
+	{
+		if (i != k)
+		{
+			realloc_environ[j] = shdata->_environ[i];
+			j++;
+		}
+	}
+	realloc_environ[j] = NULL;
+	free(shdata->_environ[k]);
+	free(shdata->_environ);
+
+	shdata->_environ = realloc_environ;
+	return (1);
+}
+
+/**
+ * cmp_env_name - compares env variables names
+ * with the name passed.
+ * @nenv: name of the environment variable
+ * @name: name passed
+ *
+ * Return: 0 if they are not equal, another value if they are.
+ */
+int cmp_env_name(const char *nenv, const char *name)
+{
+	int i;
+
+	for (i = 0; nenv[i] != '='; i++)
+	{
+		if (nenv[i] != name[i])
+		{
+			return (0);
+		}
+	}
+
+	return (i + 1);
+}

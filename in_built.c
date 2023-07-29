@@ -1,147 +1,190 @@
 #include "dash.h"
 
 /**
- * cd_dir - changes directory
- * @data: a pointer to the data structure
- *
- * Return: (Success) 0 is returned
- * ------- (Fail) negative number will returned
+ * cd_dir - Changes the current directory.
+ * @shdata: Data relevant.
+ * Return: 1 on success.
  */
-int cd_dir(das_h *data)
+int cd_dir(dash_data *shdata)
 {
-	char *home;
+	char *dir;
+	int ishome, ishome2, isddash;
 
-	home = _getenv("HOME");
-	if (data->args[1] == NULL)
+	dir = shdata->args[1];
+
+	if (dir)
 	{
-		/* Change to HOME directory and update OLDPWD */
-		SETOWD(data->oldpwd);
-		if (chdir(home) < 0)
-			return (CRASH);
-		return (PASS);
+		ishome = _strcmp("$HOME", dir);
+		ishome2 = _strcmp("~", dir);
+		isddash = _strcmp("--", dir);
 	}
-	if (_strcmp(data->args[1], "-") == 0)
+
+	/* Check for special directory names */
+	if (!dir || !ishome || !ishome2 || !isddash)
 	{
-		if (data->oldpwd == 0)
-		{
-			/* If OLDPWD is not set, change to HOME dir and update OLDPWD */
-			SETOWD(data->oldpwd);
-			if (chdir(home) < 0)
-				return (CRASH);
-		}
-		else
-		{
-			/* Change to OLDPWD and update OLDPWD with the current directory */
-			SETOWD(data->oldpwd);
-			if (chdir(data->oldpwd) < 0)
-				return (CRASH);
-		}
+		cd_home(shdata);
+		return (1);
 	}
+
+	/* Handle the "-" option */
+	if (_strcmp("-", dir) == 0)
+	{
+		cd_go_back(shdata);
+		return (1);
+	}
+
+	/* Handle "." and ".." directories */
+	if (_strcmp(".", dir) == 0 || _strcmp("..", dir) == 0)
+	{
+		cd_per(shdata);
+		return (1);
+	}
+
+	/* Handle other directory paths */
+	cd_goto(shdata);
+
+	return (1);
+}
+
+/**
+ * cd_per - changes to the parent directory
+ *
+ * @shdata: data relevant (environ)
+ *
+ * Return: no return
+ */
+void cd_per(dash_data *shdata)
+{
+	char pwd[PATH_MAX];
+	char *dir, *cp_pwd, *parent_dir;
+
+	getcwd(pwd, sizeof(pwd));
+	cp_pwd = _strdup(pwd);
+	set_env_var("OLDPWD", cp_pwd, shdata);
+	dir = shdata->args[1];
+
+	if (_strcmp(".", dir) == 0)
+	{
+		set_env_var("PWD", cp_pwd, shdata);
+		free(cp_pwd);
+		return;
+	}
+
+	parent_dir =  dirname(cp_pwd);
+	if (chdir(parent_dir) == -1)
+	{
+		error_code(shdata, 2);
+		free(cp_pwd);
+		return;
+	}
+
+	set_env_var("PWD", parent_dir, shdata);
+	shdata->status = 0;
+	free(cp_pwd);
+}
+
+/**
+ * cd_goto - changes to a directory given
+ * by the user
+ *
+ * @shdata: data relevant (directories)
+ * Return: no return
+ */
+void cd_goto(dash_data *shdata)
+{
+	char pwd[PATH_MAX];
+	char *dir, *cp_pwd, *cp_dir;
+
+	getcwd(pwd, sizeof(pwd));
+
+	dir = shdata->args[1];
+	if (chdir(dir) == -1)
+	{
+		error_code(shdata, 2);
+		return;
+	}
+
+	cp_pwd = _strdup(pwd);
+	set_env_var("OLDPWD", cp_pwd, shdata);
+
+	cp_dir = _strdup(dir);
+	set_env_var("PWD", cp_dir, shdata);
+
+	free(cp_pwd);
+	free(cp_dir);
+
+	shdata->status = 0;
+
+	chdir(dir);
+}
+
+/**
+ * cd_go_back - changes to the previous directory
+ *
+ * @shdata: data relevant (environ)
+ * Return: no return
+ */
+void cd_go_back(dash_data *shdata)
+{
+	char *p_oldpwd, *cp_pwd, *cp_oldpwd;
+
+	cp_pwd = _strdup(getcwd(NULL, 0));
+	p_oldpwd = _getenv("OLDPWD", shdata->_environ);
+
+	if (!p_oldpwd)
+		cp_oldpwd = cp_pwd;
 	else
-	{
-		/* Change to the specified directory and update OLDPWD */
-		SETOWD(data->oldpwd);
-		if (chdir(data->args[1]) < 0)
-			return (CRASH);
-	}
-	return (PASS);
-}
+		cp_oldpwd = _strdup(p_oldpwd);
 
-#undef GETCWD
+	set_env_var("OLDPWD", cp_pwd, shdata);
 
-/**
- * kill_program - exit the program
- * @data: a pointer to the data structure
- *
- * Return: (Success) 0 is returned
- * ------- (Fail) negative number will returned
- */
-int kill_program(das_h *data /* usused */)
-{
-	int code, i = 0;
+	if (chdir(cp_oldpwd) == -1)
+		set_env_var("PWD", cp_pwd, shdata);
+	else
+		set_env_var("PWD", cp_oldpwd, shdata);
 
-	if (data->args[1] == NULL)
-	{
-		/* If no argument provided, exit with the errno value */
-		free_data(data);
-		exit(errno);
-	}
+	write(STDOUT_FILENO, cp_pwd, _strlen(cp_pwd));
+	write(STDOUT_FILENO, "\n", 1);
 
-    /* Check if the argument is a valid integer (exit code) */
-	while (data->args[1][i])
-	{
-		if (_isalpha(data->args[1][i++]) < 0)
-		{
-			data->error_msg = _strdup("Illegal number\n");
-			return (CRASH);
-		}
-	}
-	code = _atoi(data->args[1]);
+	free(cp_pwd);
+	if (p_oldpwd)
+		free(cp_oldpwd);
 
-    /* Free data and exit with the provided exit code */
-	free_data(data);
-	exit(code);
+	shdata->status = 0;
+
+	chdir(cp_pwd);
 }
 
 /**
- * handle_builtin - handle and manage the builtins cmd
- * @data: a pointer to the data structure
+ * cd_home - changes to home directory
  *
- * Return: (Success) 0 is returned
- * ------- (Fail) negative number will returned
+ * @shdata: data relevant (environ)
+ * Return: no return
  */
-int handle_builtin(das_h *data)
+void cd_home(dash_data *shdata)
 {
-	/* Definition of the built-in commands and their corresponding functions */
-	in_built blt[] = {
-		{"exit", kill_program},
-		{"cd", cd_dir},
-		{"help", help_info},
-		{NULL, NULL}
-	};
-	int i = 0;
+	char *p_pwd, *home;
+	char *cp_pwd = _strdup(getcwd(NULL, 0));
+	(void) p_pwd;
 
-	/* Loop through the built-in cmd and execute the corresponding function */
-	while ((blt + i)->cmd)
+	home = _getenv("HOME", shdata->_environ);
+
+	if (!home)
 	{
-		if (_strcmp(data->args[0], (blt + i)->cmd) == 0)
-			return ((blt + i)->f(data));
-		i++;
+		set_env_var("OLDPWD", cp_pwd, shdata);
+		free(cp_pwd);
+		return;
 	}
 
-	/* If the command is not a built-in, return CRASH  */
-	return (CRASH);
+	if (chdir(home) == -1)
+	{
+		error_code(shdata, 2);
+		free(cp_pwd);
+		return;
+	}
+
+	set_env_var("OLDPWD", cp_pwd, shdata);
+	set_env_var("PWD", home, shdata);
+	free(cp_pwd);
+	shdata->status = 0;
 }
-
-/**
- * help_info - display the help menu
- * @data: a pointer to the data structure
- *
- * Return: (Success) 0 is returned
- * ------- (Fail) negative number will returned
- */
-int help_info(das_h *data)
-{
-	int fd, fw, rd = 1;
-	char c;
-
-	fd = open(data->args[1], O_RDONLY);
-	if (fd < 0)
-	{
-		data->error_msg = _strdup("no help topics match\n");
-		return (CRASH);
-	}
-	while (rd > 0)
-	{
-		rd = read(fd, &c, 1);
-		fw = write(STDOUT_FILENO, &c, rd);
-		if (fw < 0)
-		{
-			data->error_msg = _strdup("cannot write: permission denied\n");
-			return (CRASH);
-		}
-	}
-	PUT("\n");
-	return (PASS);
-}
-

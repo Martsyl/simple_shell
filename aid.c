@@ -1,110 +1,62 @@
 #include "dash.h"
 
 /**
- * _getenv - Get the value of an environment variable.
- * @path_name: Pointer to the name of the environment variable.
- *
- * Return: On success
+ * aux_help_alias - Provides help information for the builtin alias command.
+ * Return: No return value.
  */
-char *_getenv(char *path_name)
+void aux_help_alias(void)
 {
-	char **environ_cursor, *env_ptr, *name_ptr;
+	char *help = "alias: alias [-p] [name[=value]...]\n";
 
-	environ_cursor = environ;
-       /* Loop through the environment variables */
-
-	while (*environ_cursor)
-	{
-		env_ptr = *environ_cursor;
-		name_ptr = path_name;
-
-		/* Compare the name of the environ variable with the requested name */
-		while (*env_ptr == *name_ptr)
-		{
-			if (*env_ptr == '=')
-				break;
-			env_ptr++;
-			name_ptr++;
-		}
-
-		/* If a match is found, return the value of the environment variable */
-		if ((*env_ptr == '=') && (*name_ptr == '\0'))
-			return (env_ptr + 1);
-		environ_cursor++;
-	}
-
-	/* If the environment variable is not found, return NULL */
-	return (NULL);
+	write(STDOUT_FILENO, help, _strlen(help));
+	help = "\tDefine or display aliases.\n";
+	write(STDOUT_FILENO, help, _strlen(help));
 }
 
 /**
- * inter_signal - Handle the process interrupt signal (SIGINT).
- * @signo: The signal identifier.
- *
- * Return: void
+ * change_cd_help - Provides help information for the builtin cd command.
+ * Return: No return value.
  */
-void inter_signal(int signo)
+void change_cd_help(void)
 {
-	if (signo == SIGINT)
-	{
-		/* Print a newline and the prompt when a SIGINT signal is received */
-		PUT("\n");
-		PUT(PROMPT);
-	}
+	char *help = "cd: cd [-L|[-P [-e]] [-@]] [dir]\n";
+
+	write(STDOUT_FILENO, help, _strlen(help));
+	help = "\tChange the shell working directory.\n";
+	write(STDOUT_FILENO, help, _strlen(help));
 }
 
 /**
- * fill_array - Fill an array with a given element.
- * @a: Pointer to the array.
- * @el: The element to fill the array with.
- * @len: The length of the array.
- *
- * Return: Pointer to the filled array.
+ * rev_string - Reverses a string.
+ * @s: Input string.
+ * Return: No return value.
  */
-void *fill_array(void *a, int el, unsigned int len)
+void rev_string(char *s)
 {
-	char *p = a;
-	unsigned int i = 0;
-	/* Loop through the array and fill it with the given element */
-	while (i < len)
+	int length = 0;
+	char *start = s;
+	char *end = s;
+	char temp;
+
+	if (s == NULL)
+		return;
+
+	/* Find the end of the string */
+	while (*end != '\0')
 	{
-		*p = el;
-		p++;
-		i++;
+		length++;
+		end++;
 	}
-	return (a);
-}
 
-/**
- * rev_ar - Reverse an array.
- * @arr: Pointer to the array to be reversed.
- * @len: The length of the array.
- *
- * Return: void
- */
-void rev_ar(char *arr, int len)
-{
-	int i;
-	char tmp;
+	end--; /* Set 'end' to the last character before the null terminator */
 
-    /* Loop through the array and swap elements to reverse it */
-	for (i = 0; i < (len / 2); i++)
+	/* Swap characters from both ends */
+	while (start < end)
 	{
-		tmp = arr[i];
-		arr[i] = arr[(len - 1) - i];
-		arr[(len - 1) - i] = tmp;
+		temp = *start;
+		*start = *end;
+		*end = temp;
+		start++;
+		end--;
 	}
 }
-
-/**
- * index_cmd - Increment the index in the data structure.
- * @data: Pointer to the data structure (das_h).
- *
- * Return: void
- */
-void index_cmd(das_h *data)
-{
-	/* Increment the index in the data structure */
-	data->index += 1;
-}
-
